@@ -19,7 +19,6 @@ export default {
         /* 导航的行高默认是44px */
         line-height: 44px;
         text-align: center;
-        background: var(--color-tint);
         /* 引用定义好的css变量 */
         color: #fff;
         box-shadow: 0 1px 1px rgba(100,100,100,.2)

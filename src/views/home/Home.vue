@@ -3,11 +3,14 @@
         <nav-bar class="nav-bar">
             <div slot="center">购物街</div>
         </nav-bar>
+        <tab-control :itemnames="tabnames" class="tab-control" @changeTab="changeTab"
+        ref="tabcontrol1" v-show="ceilingShow"></tab-control>
         <scroll class="content" ref="scroll" :probetype="3" @scrollposition="showScroll" :pullUpLoad="true" @pullingUp="showMoreInfo">
-            <home-swiper :banners="banner"></home-swiper>
+            <home-swiper :banners="banner" @swiperLoadFinish="tabFixed"></home-swiper>
             <home-recommend :recommends="recommend"></home-recommend>
             <home-feature></home-feature>
-            <tab-control :itemnames="tabnames" class="tab-control" @changeTab="changeTab"></tab-control>
+            <tab-control :itemnames="tabnames" class="tab-control" @changeTab="changeTab"
+            ref="tabcontrol2"></tab-control>
             <goods-list :goodspop="homeGoodsShow"></goods-list>
         </scroll>
         <back-top @click.native="backTop" v-show="showBackTop"></back-top>
@@ -59,12 +62,25 @@ export default {
             // 记录首页商品属于哪种：流行、新款、精选
             showBackTop: false,
             // 用来记录是否显示回到顶部的图标，默认不显示
+            tabOffsetHeight: 0,
+            // 记录tabControl在滚动时需要实现吸顶的高度
+            ceilingShow: false,
+            // 记录要实现tabControl的吸顶效果，位于顶部的tabControl是否实现
+            pagePositionY: 0,
+            // 记录离开首页时的position位置
         }
     },
     computed: {
       homeGoodsShow() {
           return this.goods[this.currentType].list
       }  
+    },
+    activated () {
+        this.$refs.scroll.scrollTo(0, this.pagePositionY, 0)
+        this.$refs.scroll.refresh()
+    },
+    deactivated () {
+        this.pagePositionY = this.$refs.scroll.getPositionY()
     },
     created() {
         this.getHomeMultiData(),
@@ -76,7 +92,7 @@ export default {
     mounted() {
         const refresh = debounce(this.$refs.scroll.refresh, 500)
         // 调用debounce函数，返回一个函数，用refresh接受
-        this.$bus.$on("goodsItemImgLoad", () => {
+        this.$bus.$on("homeGoodsItemImgLoad", () => {
             refresh()
         })
     },
@@ -95,15 +111,21 @@ export default {
                 this.currentType = "sell"
                 break;
             }
+
+            this.$refs.tabcontrol1.currentIndex = index
+            this.$refs.tabcontrol2.currentIndex = index
         },
         // 点击回到页面顶部
         backTop() {
             this.$refs.scroll.scrollTo(0, 0)
         },
-        // 子组件传递的scroll方法中的position数据
+        // 子组件传递的scroll方法中的position数据,也相当于是一个监听
+        // 页面滚动位置的函数
         showScroll(position) {
             // console.log(position)
             this.showBackTop = (-position.y) > 1000
+
+            this.ceilingShow = (-position.y) > this.tabOffsetHeight
         },
 
         // 上拉加载更多商品,就是调用getHomeGoods方法
@@ -133,6 +155,11 @@ export default {
                 this.$refs.scroll.finishPullUp()
             })   
         },
+
+        // 轮播图图片加载完成后获取tabControl的offsetTop
+        tabFixed() {
+            this.tabOffsetHeight = this.$refs.tabcontrol2.$el.offsetTop
+        }
     },
 }
 </script>
@@ -151,6 +178,7 @@ export default {
         left: 0px;
         right: 0px;
         z-index: 2;
+        background: var(--color-tint);
     }
 
     .tab-control {

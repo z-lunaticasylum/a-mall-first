@@ -1,6 +1,6 @@
 <template>
-    <div class="goods-list-items">
-        <img :src="goodsitem.show.img" alt="" @load="imgLoad">
+    <div class="goods-list-items" @click="showDetails">
+        <img v-lazy="showImg" alt="" @load="imgLoad">
         <div class="goodsitem-text">
             <p>{{goodsitem.title}}</p>
             <span class="price">{{goodsitem.price}}</span>
@@ -20,10 +20,27 @@ export default {
             }
         }
     },
+    computed: {
+      showImg() {
+        return this.goodsitem.image || this.goodsitem.show.img
+        // 为什么这里调换了顺序就会报错？
+      }
+    },
     methods: {
       imgLoad() {
-        this.$bus.$emit("goodsItemImgLoad")
+        // this.$bus.$emit("goodsItemImgLoad")
         // 使用事件总线，当图片加载完成后将事件发送出去
+
+        // 由于这个组件被两个地方调用了，分别是首页和详情页，因此需要对首页和详情页
+        // 的图片分别加载完后的重刷新进行判断
+        if(this.$route.path.indexOf("/home") !== -1) {
+          this.$bus.$emit("homeGoodsItemImgLoad")
+        }else if(this.$route.path.indexOf("/recommend") !== -1) {
+          this.$bus.$emit("detailsItemImgLoad")
+        }
+      },
+      showDetails() {
+        this.$router.push("/details/" + this.goodsitem.iid)
       }
     }
 }

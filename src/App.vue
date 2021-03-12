@@ -3,7 +3,9 @@
     <main-tab-bar class="main-tab-bar"></main-tab-bar>
     <!-- <router-view></router-view> -->
     <!-- <router-view></router-view> -->
-    <router-view/>
+    <keep-alive exclude="Details">
+      <router-view/>
+    </keep-alive>
   </div>
 </template>
 
@@ -24,6 +26,6 @@ export default {
   @import "./assets/css/base.css";
 
   .main-tab-bar {
-    z-index: 99;
+    z-index: 9;
   }
 </style>

@@ -7,12 +7,14 @@ const Category = () => import("views/category/Category")
 const Car = () => import("views/car/Car")
 const Profile = () => import("views/profile/Profile")
 
+const Details = () => import("views/details/Details")
+
 Vue.use(Router)
 
 const routes = [
     {
         path: "",
-        redirect: "/home"
+        redirect: "/home",
     },
     {
         path: "/home",
@@ -29,7 +31,11 @@ const routes = [
     {
         path: "/profile",
         component: Profile
-    }
+    },
+    {
+        path: "/details/:iid",
+        component: Details
+    },
 ]
 
 const router = new Router({
